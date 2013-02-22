@@ -1,0 +1,11 @@
+#!/bin/bash
+curl http://192.168.2.1/cgi-bin/login.cgi
+curl http://192.168.2.1/cgi-bin/disconnect.exe
+sleep 3
+curl http://192.168.2.1/cgi-bin/connect.exe
+exit 0
+
+
+
+
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+# Script to toggle between 'us' (no dead keys) and 'us intl' (dead keys and AltGr+key)
+
+# setxkbmap -print|grep xkb_symbols
+# gives either:
+#        xkb_symbols   { include "pc+us(intl)+inet(pc105)"       };
+#or:
+#        xkb_symbols   { include "pc+us+inet(pc105)"     };
+
+setxkbmap -print|grep xkb_symbols | grep nodeadkeys > /dev/null 2>&1
+if [ $? -eq 0 ];then
+    # 'us intl' (dead keys) was set, toggle to 'us' (no dead keys).
+    setxkbmap -variant basic
+else
+    # 'us' (no dead keys) was set, toggle to 'us intl' (dead keys).
+    setxkbmap -variant nodeadkeys
+fi

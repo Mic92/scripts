@@ -1,0 +1,3 @@
+[submodule "vendor/git-pull-request"]
+	path = vendor/git-pull-request
+	url = https://github.com/splitbrain/git-pull-request.git

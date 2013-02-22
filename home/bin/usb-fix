@@ -1,0 +1,2 @@
+sudo modprobe -vr ehci_hcd
+sudo modprobe -v ehci_hcd

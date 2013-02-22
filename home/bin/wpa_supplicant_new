@@ -1,0 +1,13 @@
+#!/bin/bash
+iwlist wlan0 scan
+
+echo -n "Enter your essid and press [ENTER]: "
+read essid
+echo -n "Enter your password and press [ENTER]: "
+stty -echo
+read password
+stty echo
+echo "Write to wpa_supplicant.conf (requires root password)"
+wpa_passphrase $essid $password | sudo tee -a /etc/wpa_supplicant.conf
+echo Start to authenticate for network
+sudo wpa_supplicant -Dnl80211,wext -i wlan0 -c/etc/wpa_supplicant.conf
