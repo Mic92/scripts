@@ -1,0 +1,24 @@
+#!/usr/bin/env python2
+import sys, os
+import subprocess
+import qrencode
+from tempfile import mkstemp
+from PIL import Image
+
+def open_default(path):
+    if sys.platform.startswith('darwin'):
+        subprocess.call(('open', path))
+    elif os.name == 'nt':
+        os.startfile(path)
+    elif os.name == 'posix':
+        subprocess.call(('xdg-open', path))
+
+args = sys.argv[1:]
+if args:
+  text = "".join(args)
+else:
+  text = sys.stdin.read()
+_, _, image = qrencode.encode_scaled(text, 500)
+_, path = mkstemp(".png")
+image.save(path, "PNG")
+open_default(path)
