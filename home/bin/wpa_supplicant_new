@@ -1,5 +1,7 @@
 #!/bin/bash
-iwlist wlan0 scan
+IFACE=wlp3s0
+set -e
+iwlist $IFACE scan | grep --color -E '(^|ESSID|Frequency)'
 
 echo -n "Enter your essid and press [ENTER]: "
 read essid
@@ -8,6 +10,6 @@ stty -echo
 read password
 stty echo
 echo "Write to wpa_supplicant.conf (requires root password)"
-wpa_passphrase $essid $password | sudo tee -a /etc/wpa_supplicant.conf
-echo Start to authenticate for network
-sudo wpa_supplicant -Dnl80211,wext -i wlan0 -c/etc/wpa_supplicant.conf
+wpa_passphrase $essid $password | sudo tee -a /etc/wpa_supplicant/wpa_supplicant.conf
+echo Restart wpa_supplicant
+sudo systemctl restart wpa_supplicant@$IFACE
