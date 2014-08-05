@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require 'fileutils'
+require 'tmpdir'
+require 'pathname'
+
+BASE_URL = "https://aur.archlinux.org"
+MASTER_BRANCH = "master"
+
+def sh(*cmd)
+  puts "$ #{cmd.join(" ")}"
+  system(*cmd)
+end
+
+def main(opts)
+  sh "git", "stash", "save"
+  sh("git", "checkout", "-B", opts[:local_name])
+  sh "git", "rebase", "master"
+  FileUtils.rm_rf(opts[:local_name])
+  FileUtils.mkdir_p(opts[:local_name])
+  dest = File.realpath(opts[:local_name])
+  pkg_files = nil
+  Dir.mktmpdir do |dir|
+    Dir.chdir(dir) do
+      sh "yaourt", "-G", "--noconfirm", opts[:upstream_name]
+      path = Pathname.new(opts[:upstream_name])
+      pkg_files = path.children.map do |file|
+        FileUtils.cp_r file, dest
+        File.basename(file)
+      end
+    end
+  end
+  pkg_files.each do |file|
+    sh "git", "add", File.join(opts[:local_name], file)
+  end
+  now = Time.new.strftime("%Y-%m-%d %H:%M:%S")
+  sh "git", "commit", "-m", "Update #{opts[:local_name]} at #{now}"
+  sh "git", "reset", "--hard", "HEAD"
+  sh "git", "checkout", MASTER_BRANCH
+  sh "git", "stash", "apply"
+end
+
+options = {}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options] package_name"
+
+  opts.on("-u", "--upstream-name NAME", "Upstream name") do |name|
+    options[:upstream_name] = name
+  end
+end
+parser.parse!
+
+if ARGV.empty?
+  puts parser
+  exit(1)
+end
+package_name = ARGV[0]
+options[:upstream_name] ||= package_name
+options[:local_name] = package_name
+
+main(options)
